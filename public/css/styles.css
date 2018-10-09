@@ -1,0 +1,21 @@
+
+body {
+    background: #F0F0F0;
+    font-family: 'PT Sans';
+}
+
+.navbar.bg-light {
+    background: #F0F0F0!important;
+}
+
+.jumbotron {
+    background: white;
+}
+
+.invalid {
+    border: 1px solid red;
+}
+
+.pac-container{
+    z-index: 99999999999999 !important;
+  }
