@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\ChangeOrder;
@@ -8,10 +7,15 @@ use App\Quote;
 use App\Schedule;
 use App\Services\Stripe;
 use App\Shop;
+use App\Log;
+use App\User;
+use App\UserSetting;
 use App\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Redirect;
+use Illuminate\Support\Facades\Response;
 use Mockery\Exception;
 
 
@@ -265,8 +269,8 @@ class SuperManagerController extends Controller
         checkUserIs('supermanager');
 
         $quote = Quote::findOrFail($request->quote);
-
-        $cost = (count($quote->pickups) * 30) + (count($quote->totalChangeOrder() * 30));
+        
+        $cost = (count($quote->pickupps) * 30) + (count($quote->totalChangeOrder() * 30));
 
         if($request->stripeToken && Auth::user()->stripe_id) {
             // The customer already has a card saved, but they have chosen to update it
@@ -447,4 +451,125 @@ class SuperManagerController extends Controller
 
     }
 
+    public function myAccountHtml(Request $request) {
+
+        checkUserIs('supermanager');
+        
+        $id = Auth::id();
+        $usersetting_info = UserSetting::where( [ 'id' => $id ] )->get();
+        return view('supermanager.myaccount', compact( 'usersetting_info' ) );
+
+    }
+    
+    public function edit_profileHtml( ) {
+
+        checkUserIs('supermanager');
+        
+        return view( "supermanager.edit_profile" );
+    }
+    
+    public function myAccountUpdate(Request $request) {
+
+        checkUserIs('supermanager');
+
+        $user = Auth::user();
+
+        $user->name = $request->name;
+        $user->mobile = $request->mobile;
+        $user->address_1 = $request->address1;
+        $user->address_2 = $request->address2;
+        $user->city = $request->city;
+        $user->state = $request->state;
+
+        $user->save();
+        
+        $id = Auth::id();
+        $usersetting_info = UserSetting::where( [ 'id' => $id ] )->get();
+        if( isset( $usersetting_info[0]['id'] ) && $usersetting_info[0]['id'] == $id ){
+            $update_id = UserSetting::where( [ 'id'=> $id ] )->update( 
+                    [ 'report_email'   => $request->report_email,
+                      'delivery_pickup_notification' => $request->pick_up,
+                      'delivery_completion_notification'  =>  $request->delivery_completion
+                    ]);
+        }else{
+            $user_setting = new UserSetting();
+            $user_setting->id = Auth::id();
+            $user_setting->report_email = $request->report_email;
+            $user_setting->delivery_pickup_notification = $request->pick_up;
+            $user_setting->delivery_completion_notification = $request->delivery_completion;
+            $user_setting->save();
+        }
+        flash('Your user information has been updated')->success();
+
+        Log::insert([
+            'user_id' => Auth::id(),
+            'message' => 'User #' . Auth::id() . ' (' . Auth::user()->name . ') updated their account information.',
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
+        return redirect('/supermanager/myaccount');
+    }
+    
+    public function download()
+    {
+        $headers = [
+                'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0'
+            ,   'Content-type'        => 'text/csv'
+            ,   'Content-Disposition' => 'attachment; filename=history.csv'
+            ,   'Expires'             => '0'
+            ,   'Pragma'              => 'public'
+        ];
+
+//        $pastPickups = Pickup::where('supermanager_id', Auth::id())
+//            ->whereIn('status', ['completed', 'cancelled'])->get();
+//
+//        return view('supermanager.history', [
+//            'pastPickups' => $pastPickups
+//        ]);
+        
+        $list = Pickup::where('supermanager_id', Auth::id())
+            ->whereIn('status', ['completed', 'cancelled'])->get()->toArray();
+//        echo "<pre>";
+        foreach ( $list as $row_key => $row ) { 
+            if( $row['status'] == "COMPLETED" ){
+                $row['status'] = "Completed";
+            } else if( $row['status'] == "CANCELLED" ){
+                $row['status'] = "Cancelled";
+            }else{
+                $row['status'] = $row['status'];
+            }
+            
+            $shop_name = Shop::where('id', $row['shop_id'])->get();
+            $supermanager_name = User::where('id', $row['supermanager_id'])->get();
+            $transaction_id = Transaction::where('quote_id', $row['quote_id'])->get();
+            
+            $arr_list[$row_key]['id'] =  $row['id'];
+            $arr_list[$row_key]['created_at'] = $row['created_at'];
+            $arr_list[$row_key]['pickup_date'] = $row['pickup_date'];
+            $arr_list[$row_key]['location'] = $shop_name[0]['name'];
+            $arr_list[$row_key]['amount'] = number_format($row['amount']);
+            $arr_list[$row_key]['status'] = $row['status'];
+            $arr_list[$row_key]['supermanager_id'] = $supermanager_name[0]['name'];
+            $arr_list[$row_key]['trasaction_id'] = $transaction_id[0]['id'];
+            $arr_list[$row_key]['total'] = $transaction_id[0]['amount'];
+            $arr_list[$row_key]['gross_amount'] = $row['gross'];
+        }
+//        print_r($list);
+        # add headers for each column in the CSV download
+        array_unshift($arr_list, array_keys($arr_list[0]));
+//        print_r($arr_list);
+//        print_r($list);
+//        echo "</pre>";
+//        exit;
+        $callback = function() use ($arr_list){
+            $FH = fopen('php://output', 'w');
+            foreach ($arr_list as $row) { 
+                fputcsv($FH, $row);
+            }
+            fclose($FH);
+        };
+
+        return Response::stream($callback, 200, $headers); //use Illuminate\Support\Facades\Response;
+
+    }
+    
 }

@@ -22,6 +22,9 @@
                 <a href="/driver/bankaccount" class="list-group-item list-group-item-action">
                     Bank Account
                 </a>
+                <a href="/driver/edit_profile" class="list-group-item list-group-item-action">
+                    Edit Profile
+                </a>
             </div>
 
         </div>
@@ -55,12 +58,12 @@
 
                 <div class="form-group">
                     <label>Address Line 1</label>
-                    <input type="text" class="form-control" name="address1" value="{{ Auth::user()->address1 }}">
+                    <input type="text" class="form-control" name="address1" value="{{ Auth::user()->address_1 }}">
                 </div>
 
                 <div class="form-group">
                     <label>Address Line 2</label>
-                    <input type="text" class="form-control" name="address2" value="{{ Auth::user()->address2 }}">
+                    <input type="text" class="form-control" name="address2" value="{{ Auth::user()->address_2 }}">
                 </div>
 
                 <div class="form-group">

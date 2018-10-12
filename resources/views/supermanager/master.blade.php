@@ -33,8 +33,9 @@
                             <a class="nav-link" href="/supermanager/locations">My Locations</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/user/edit_profile">Edit Profile</a>
+                            <a class="nav-link" href="/supermanager/myaccount">My Account</a>
                         </li>
+                        
                         <li class="nav-item">
                             <a class="nav-link" href="/logout">Logout</a>
                         </li>

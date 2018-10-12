@@ -121,5 +121,13 @@ class DriverController extends Controller
         ]);
 
     }
+    
+    public function edit_profileHtml( ) {
+
+        checkUserIs('driver');
+        
+        return view( "driver.edit_profile" );
+    }
+    
 
 }

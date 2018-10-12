@@ -2,7 +2,7 @@
 
 @section('page')
 
-    <h3>My Pickup History</h3>
+<h3>My Pickup History</h3> <div style="float: right"><a href="/supermanager/download">Download</a></div>
     
     <table class="table table-striped" width="100%">
         <thead>

@@ -6,11 +6,18 @@
 
     <h4 class="mb-4 mt-5">Change Password</h4>
     
-
+    @include('flash::message')
+    
+    
+    
     <div class="row">
         <div class="col">
             <div class="card">
-
+                @if ( $link_verify == "link_verified" )
+                    <div class="card-body">
+                        Link has been sent to your mail id for change password verification.
+                    </div>
+                @else
                 <div class="card-body">
                     <form class="form-horizontal" method="POST" action="{{ url( '/user/change_password' ) }}">
                         {{ csrf_field() }}
@@ -59,13 +66,14 @@
                         </div>
                     </form>
                 </div>
+                @endif
             </div>
         </div>
     </div>
 </div>
 
     
-@include('flash::message')
+
 @endsection
 
 

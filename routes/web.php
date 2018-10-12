@@ -18,7 +18,8 @@ Route::get('/supermanager/newchangeorder', 'SuperManagerController@newChangeOrde
 Route::post('/supermanager/newchangeorder', 'SuperManagerController@newChangeOrderPost');
 Route::get('/supermanager/locations', 'SuperManagerController@myLocationsHtml');
 Route::post('/supermanager/locations', 'SuperManagerController@createLocationPost');
-
+Route::get('/supermanager/myaccount', 'SuperManagerController@myAccountHtml')->middleware('auth');
+Route::post('/supermanager/myaccount', 'SuperManagerController@myAccountUpdate')->middleware('auth');
 
 Route::get('/supermanager/delete-location-ajax', 'SuperManagerController@deleteLocationAjax');
 Route::get('/supermanager/edit_location_form/{id}', 'SuperManagerController@edit_location_form');
@@ -28,6 +29,8 @@ Route::get('/supermanager/newchangeorder/confirm/{quote}', 'SuperManagerControll
 
 Route::post('/supermanager/locations/ajax', 'SuperManagerController@createLocationAjax');
 Route::post('/supermanager/locations/ajax', 'SuperManagerController@createLocationAjax');
+Route::get( '/supermanager/edit_profile', 'SuperManagerController@edit_profileHtml' );
+Route::get( '/supermanager/download', 'SuperManagerController@download' );
 
 Route::get('/admin', 'AdministratorController@home');
 Route::get('/admin/current-jobs', 'AdministratorController@currentJobs');
@@ -71,10 +74,13 @@ Route::get('/driver/myaccount', 'DriverController@myAccountHtml')->middleware('a
 Route::post('/driver/myaccount', 'DriverController@myAccountUpdate')->middleware('auth');
 
 Route::get('/driver/history', 'DriverController@jobHistory')->middleware('auth');
+Route::get( '/driver/edit_profile', 'DriverController@edit_profileHtml' );
 
-Route::get('/user/edit_profile', 'EditProfileController@edit_profileHtml');
-Route::get('/user/change_password_html', 'EditProfileController@change_password_html');
-Route::post('/user/change_password', 'EditProfileController@change_password');
+Route::get( '/user/change_password_html', 'EditProfileController@change_password_html' );
+Route::post( '/user/change_password', 'EditProfileController@change_password' );
+Route::get( '/user/change_email_html', 'EditProfileController@change_email_html' );
+Route::post( '/user/change_email', 'EditProfileController@change_email' );
+Route::get( '/user/verify/{id}/{type}/{key}', 'EditProfileController@verify_html' );
 
 
 Route::get('/driver/activejob/{jobId}', 'ActiveJobController@start')->middleware('auth');

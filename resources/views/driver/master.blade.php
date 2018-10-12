@@ -37,9 +37,6 @@
                                 <a class="nav-link" href="/driver/myaccount">My Account</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/user/edit_profile">Edit Profile</a>
-                            </li>
-                            <li class="nav-item">
                                 <a class="nav-link" href="/logout">Logout</a>
                             </li>
                         </ul>

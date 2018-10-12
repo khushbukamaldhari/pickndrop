@@ -22,6 +22,9 @@
                 <a href="/driver/bankaccount" class="list-group-item list-group-item-action active">
                     Bank Account
                 </a>
+                <a href="/driver/edit_profile" class="list-group-item list-group-item-action">
+                    Edit Profile
+                </a>
             </div>
 
         </div>

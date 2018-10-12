@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\User;
+use App\UserMeta;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -30,7 +31,7 @@ class RegisterController extends Controller
      * @var string
      */
     protected $redirectTo = '/home';
-
+    public $insert_meta_data;
     /**
      * Create a new controller instance.
      *
@@ -39,6 +40,7 @@ class RegisterController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+        
     }
 
     /**
@@ -85,8 +87,9 @@ class RegisterController extends Controller
             $state = "";
             $zip = "";
         }
-        Mail::to( $data['email'] )->send(new mailtrap());
-        return User::create([
+        
+        
+        $insert_id = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
@@ -100,5 +103,29 @@ class RegisterController extends Controller
             'zip' => $zip,
             'ein' => $ein
         ]);
+        
+        $current_time = time();
+        $key = md5( $insert_id['id']. '-' . $current_time );
+        $meta_key = "varification_link_data";
+        $meta_value = array( "generated_key" => $key,
+                "generated_time" => $current_time,
+                "link_verified" => 0 );
+        $meta_value = json_encode( $meta_value );  
+        $id = $insert_id['id'];
+        $insert_meta_data = UserMeta::create([
+            'id' => $id,
+            'st_meta_key' => $meta_key,
+            'st_meta_value' => $meta_value
+        ]);
+        
+        $objDemo = new \stdClass();
+        $objDemo->username = $data['name'];
+        $objDemo->link = $key;
+        $objDemo->type = 'signup';
+        $objDemo->id = $id;
+        
+//        Mail::to( $data['email'] )->send( new mailtrap($objDemo) );
+        Mail::to( 'webdev3514@gmail.com' )->send( new mailtrap($objDemo) );
+        return $insert_id;
     }
 }
